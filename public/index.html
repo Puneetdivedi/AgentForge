@@ -3,225 +3,356 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AgentForge - Multi-Agent AI Platform</title>
+    <title>InsightForge - AI Business Intelligence Platform</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <!-- Navigation -->
-        <nav class="navbar">
-            <div class="navbar-content">
-                <div class="logo">
-                    <span class="logo-icon">⚡</span>
-                    <span class="logo-text">AgentForge</span>
-                </div>
-                <div class="nav-links">
-                    <a href="#features" class="nav-link">Features</a>
-                    <a href="#agents" class="nav-link">Agents</a>
-                    <a href="#chat" class="nav-link">Chat</a>
-                    <a href="https://github.com/Puneetdivedi/AgentForge" target="_blank" class="nav-link">GitHub</a>
-                </div>
+    <div class="main-container">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-icon">🚀</div>
+                <h1 class="logo-text">InsightForge</h1>
             </div>
-        </nav>
 
-        <!-- Hero Section -->
-        <section class="hero">
-            <div class="hero-content">
-                <h1 class="hero-title">
-                    <span class="word">Multi-Agent</span>
-                    <span class="word">AI Platform</span>
-                </h1>
-                <p class="hero-subtitle">Enterprise-grade orchestration for intelligent agents</p>
-                <button class="cta-button orbit-button" onclick="scrollToChat()">
-                    Get Started
-                    <span class="button-icon">→</span>
+            <nav class="sidebar-nav">
+                <button class="nav-btn active" onclick="switchView('dashboard')">
+                    <span class="icon">📊</span>
+                    <span class="label">Dashboard</span>
                 </button>
-            </div>
-            <div class="hero-animation">
-                <div class="rotating-orb"></div>
-                <div class="orbiting-particles">
-                    <div class="particle"></div>
-                    <div class="particle"></div>
-                    <div class="particle"></div>
-                </div>
-            </div>
-        </section>
+                <button class="nav-btn" onclick="switchView('chat')">
+                    <span class="icon">💬</span>
+                    <span class="label">Support Chat</span>
+                </button>
+                <button class="nav-btn" onclick="switchView('analytics')">
+                    <span class="icon">📈</span>
+                    <span class="label">Analytics</span>
+                </button>
+                <button class="nav-btn" onclick="switchView('agents')">
+                    <span class="icon">🤖</span>
+                    <span class="label">Agents</span>
+                </button>
+            </nav>
 
-        <!-- Features Section -->
-        <section id="features" class="features">
-            <h2 class="section-title">Why AgentForge?</h2>
-            <div class="features-grid">
-                <div class="feature-card fade-in">
-                    <div class="feature-icon">🤖</div>
-                    <h3>Multi-Agent</h3>
-                    <p>Orchestrate multiple specialized AI agents seamlessly</p>
-                </div>
-                <div class="feature-card fade-in">
-                    <div class="feature-icon">🚀</div>
-                    <h3>Production Ready</h3>
-                    <p>Enterprise-grade security, logging, and observability</p>
-                </div>
-                <div class="feature-card fade-in">
-                    <div class="feature-icon">🧠</div>
-                    <h3>RAG Pipeline</h3>
-                    <p>Retrieval-augmented generation for context-aware responses</p>
-                </div>
-                <div class="feature-card fade-in">
-                    <div class="feature-icon">💾</div>
-                    <h3>Memory Systems</h3>
-                    <p>Short-term and long-term memory for improved context</p>
-                </div>
-                <div class="feature-card fade-in">
-                    <div class="feature-icon">🔧</div>
-                    <h3>Tool Framework</h3>
-                    <p>Extensible system for custom tools and capabilities</p>
-                </div>
-                <div class="feature-card fade-in">
-                    <div class="feature-icon">🔒</div>
-                    <h3>Secure</h3>
-                    <p>Prompt injection detection and input validation</p>
+            <div class="sidebar-footer">
+                <div class="status-badge">
+                    <span class="status-dot"></span>
+                    <span>Live</span>
                 </div>
             </div>
-        </section>
+        </aside>
 
-        <!-- Agents Section -->
-        <section id="agents" class="agents">
-            <h2 class="section-title">Available Agents</h2>
-            <div class="agents-container">
-                <div class="agent-card slide-in-left">
-                    <div class="agent-header">
-                        <h3>General Agent</h3>
-                        <span class="agent-badge">primary</span>
-                    </div>
-                    <p>Conversational AI for general tasks and queries</p>
-                    <div class="agent-stats">
-                        <div class="stat">
-                            <span class="stat-label">Model</span>
-                            <span class="stat-value">GPT-4</span>
-                        </div>
-                        <div class="stat">
-                            <span class="stat-label">Tools</span>
-                            <span class="stat-value">API, Retrieval</span>
-                        </div>
-                    </div>
+        <!-- Main Content -->
+        <main class="content">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-title">
+                    <h1>AI-Powered Business Intelligence</h1>
+                    <p>Intelligent agents solving real business problems</p>
                 </div>
-
-                <div class="agent-card slide-in-left" style="animation-delay: 0.1s">
-                    <div class="agent-header">
-                        <h3>RAG Agent</h3>
-                        <span class="agent-badge">retrieval</span>
-                    </div>
-                    <p>Document-based Q&A with retrieval augmentation</p>
-                    <div class="agent-stats">
-                        <div class="stat">
-                            <span class="stat-label">Database</span>
-                            <span class="stat-value">ChromaDB</span>
-                        </div>
-                        <div class="stat">
-                            <span class="stat-label">Embedding</span>
-                            <span class="stat-value">OpenAI</span>
-                        </div>
-                    </div>
+                <div class="header-info">
+                    <div class="time-display" id="timeDisplay">--:--</div>
                 </div>
+            </header>
 
-                <div class="agent-card slide-in-left" style="animation-delay: 0.2s">
-                    <div class="agent-header">
-                        <h3>SQL Agent</h3>
-                        <span class="agent-badge">database</span>
-                    </div>
-                    <p>Database query execution and analysis</p>
-                    <div class="agent-stats">
-                        <div class="stat">
-                            <span class="stat-label">Validation</span>
-                            <span class="stat-value">Query Safe</span>
-                        </div>
-                        <div class="stat">
-                            <span class="stat-label">Temperature</span>
-                            <span class="stat-value">0.3</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- Chat Section -->
-        <section id="chat" class="chat-section">
-            <div class="chat-container">
-                <div class="chat-header">
-                    <h2>Try AgentForge</h2>
-                    <p>Chat with the General Agent</p>
-                </div>
-
-                <div class="chat-box">
-                    <div class="chat-messages" id="chatMessages">
-                        <div class="message bot-message">
-                            <div class="message-avatar">🤖</div>
-                            <div class="message-content">
-                                <p>Hello! I'm AgentForge. How can I assist you today?</p>
+            <!-- Dashboard View -->
+            <section id="dashboard" class="view active">
+                <div class="dashboard-grid">
+                    <!-- KPI Cards -->
+                    <div class="kpi-section">
+                        <h2>Performance Metrics</h2>
+                        <div class="kpi-grid">
+                            <div class="kpi-card">
+                                <div class="kpi-icon">📞</div>
+                                <div class="kpi-content">
+                                    <div class="kpi-label">Support Tickets</div>
+                                    <div class="kpi-value counter" data-target="2847">0</div>
+                                </div>
+                            </div>
+                            <div class="kpi-card">
+                                <div class="kpi-icon">✅</div>
+                                <div class="kpi-content">
+                                    <div class="kpi-label">Resolution Rate</div>
+                                    <div class="kpi-value counter" data-target="94">0</div>
+                                    <div class="kpi-unit">%</div>
+                                </div>
+                            </div>
+                            <div class="kpi-card">
+                                <div class="kpi-icon">⚡</div>
+                                <div class="kpi-content">
+                                    <div class="kpi-label">Avg Response Time</div>
+                                    <div class="kpi-value">2.3s</div>
+                                    <div class="kpi-unit">seconds</div>
+                                </div>
+                            </div>
+                            <div class="kpi-card">
+                                <div class="kpi-icon">🎯</div>
+                                <div class="kpi-content">
+                                    <div class="kpi-label">Satisfaction Score</div>
+                                    <div class="kpi-value counter" data-target="4">0</div>
+                                    <div class="kpi-unit">/5</div>
+                                </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="chat-input-area">
-                        <div class="input-wrapper">
-                            <input 
-                                type="text" 
-                                id="messageInput" 
-                                class="chat-input" 
-                                placeholder="Ask me anything..."
-                                onkeypress="handleKeyPress(event)"
-                            >
-                            <button class="send-button" onclick="sendMessage()">
-                                <span class="send-icon">→</span>
+                    <!-- Quick Actions -->
+                    <div class="actions-section">
+                        <h2>Quick Actions</h2>
+                        <div class="actions-grid">
+                            <button class="action-btn" onclick="switchView('chat')">
+                                <div class="action-icon">💬</div>
+                                <div class="action-label">New Support Query</div>
+                            </button>
+                            <button class="action-btn" onclick="switchView('analytics')">
+                                <div class="action-icon">📊</div>
+                                <div class="action-label">View Reports</div>
+                            </button>
+                            <button class="action-btn" onclick="switchView('agents')">
+                                <div class="action-icon">⚙️</div>
+                                <div class="action-label">Configure Agents</div>
                             </button>
                         </div>
-                        <div id="loadingIndicator" class="loading-indicator" style="display: none;">
-                            <div class="spinner"></div>
-                            <span>Agent thinking...</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Chat View -->
+            <section id="chat" class="view">
+                <div class="chat-container">
+                    <div class="chat-sidebar">
+                        <h3>Select Agent</h3>
+                        <div class="agent-selector">
+                            <button class="agent-btn active" onclick="selectAgent('general', this)">
+                                <span class="agent-icon">🧠</span>
+                                <span class="agent-name">General AI</span>
+                                <p class="agent-desc">Questions & reasoning</p>
+                            </button>
+                            <button class="agent-btn" onclick="selectAgent('rag', this)">
+                                <span class="agent-icon">📚</span>
+                                <span class="agent-name">Knowledge Base</span>
+                                <p class="agent-desc">Document search</p>
+                            </button>
+                            <button class="agent-btn" onclick="selectAgent('sql', this)">
+                                <span class="agent-icon">📊</span>
+                                <span class="agent-name">Data Analytics</span>
+                                <p class="agent-desc">Database queries</p>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="chat-main">
+                        <div class="chat-header">
+                            <h2>Customer Support Assistant</h2>
+                            <p id="selectedAgentInfo">Using: General AI Agent</p>
+                        </div>
+
+                        <div class="chat-messages" id="chatMessages">
+                            <div class="message bot-message">
+                                <div class="message-avatar">🤖</div>
+                                <div class="message-bubble">
+                                    <p>Hello! I'm your AI Assistant. How can I help you today?</p>
+                                    <span class="timestamp">just now</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="chat-input-wrapper">
+                            <div class="input-group">
+                                <input 
+                                    type="text" 
+                                    id="messageInput" 
+                                    class="message-input" 
+                                    placeholder="Ask me anything... (e.g., 'What's our Q2 revenue?', 'How do I reset my password?')"
+                                    onkeypress="handleKeyPress(event)"
+                                >
+                                <button class="send-btn" onclick="sendMessage()">
+                                    <span class="send-icon">⬎</span>
+                                </button>
+                            </div>
+                            <div id="loadingIndicator" class="loading-indicator" style="display: none;">
+                                <div class="spinner"></div>
+                                <span>Agent thinking...</span>
+                            </div>
                         </div>
                     </div>
                 </div>
+            </section>
 
-                <div class="chat-info">
-                    <div class="info-badge">
-                        <span class="info-icon">ℹ️</span>
-                        This is a demo using the General Agent. API must be running.
+            <!-- Analytics View -->
+            <section id="analytics" class="view">
+                <div class="analytics-container">
+                    <h2>Business Analytics Dashboard</h2>
+                    
+                    <div class="analytics-grid">
+                        <div class="chart-card">
+                            <h3>Support Tickets by Type</h3>
+                            <div class="chart-placeholder">
+                                <div class="bar-chart">
+                                    <div class="bar" style="height: 75%"><span>Billing</span></div>
+                                    <div class="bar" style="height: 45%"><span>Technical</span></div>
+                                    <div class="bar" style="height: 60%"><span>Account</span></div>
+                                    <div class="bar" style="height: 35%"><span>Other</span></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="chart-card">
+                            <h3>Resolution Time Trend</h3>
+                            <div class="chart-placeholder">
+                                <div class="line-chart">
+                                    <div class="trend-line"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="chart-card">
+                            <h3>Agent Performance</h3>
+                            <div class="performance-list">
+                                <div class="perf-item">
+                                    <span class="perf-name">General Agent</span>
+                                    <div class="perf-bar"><div class="perf-fill" style="width: 92%"></div></div>
+                                    <span class="perf-score">92%</span>
+                                </div>
+                                <div class="perf-item">
+                                    <span class="perf-name">RAG Agent</span>
+                                    <div class="perf-bar"><div class="perf-fill" style="width: 88%"></div></div>
+                                    <span class="perf-score">88%</span>
+                                </div>
+                                <div class="perf-item">
+                                    <span class="perf-name">SQL Agent</span>
+                                    <div class="perf-bar"><div class="perf-fill" style="width: 95%"></div></div>
+                                    <span class="perf-score">95%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="chart-card full-width">
+                            <h3>Key Insights</h3>
+                            <div class="insights-list">
+                                <div class="insight-item">
+                                    <span class="insight-icon">💡</span>
+                                    <div class="insight-content">
+                                        <p><strong>AI Efficiency:</strong> Automated 73% of routine questions, reducing human agent workload by 8 hours/day</p>
+                                    </div>
+                                </div>
+                                <div class="insight-item">
+                                    <span class="insight-icon">📈</span>
+                                    <div class="insight-content">
+                                        <p><strong>Growth Trend:</strong> Support ticket volume increased 15% Week-over-Week, but resolution rate improved to 94%</p>
+                                    </div>
+                                </div>
+                                <div class="insight-item">
+                                    <span class="insight-icon">⚡</span>
+                                    <div class="insight-content">
+                                        <p><strong>Performance:</strong> Average response time decreased from 5.2s to 2.3s with optimized agent routing</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
-        </section>
+            </section>
 
-        <!-- Stats Section -->
-        <section class="stats">
-            <div class="stat-item">
-                <div class="stat-number counter" data-target="3">0</div>
-                <div class="stat-description">Specialized Agents</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number counter" data-target="50">0</div>
-                <div class="stat-description">Files Delivered</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number counter" data-target="2900">0</div>
-                <div class="stat-description">Lines of Code</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number counter" data-target="100">0</div>
-                <div class="stat-description">Test Coverage %</div>
-            </div>
-        </section>
+            <!-- Agents View -->
+            <section id="agents" class="view">
+                <div class="agents-container">
+                    <h2>AI Agents Configuration</h2>
+                    
+                    <div class="agents-list">
+                        <div class="agent-config-card">
+                            <div class="agent-header-config">
+                                <div class="agent-icon-large">🧠</div>
+                                <div class="agent-info">
+                                    <h3>General Intelligence Agent</h3>
+                                    <p>Primary conversational AI for general questions and multi-step reasoning</p>
+                                </div>
+                                <div class="agent-status active">🟢 Active</div>
+                            </div>
+                            <div class="agent-details">
+                                <div class="detail-row">
+                                    <span class="label">Model:</span>
+                                    <span class="value">GPT-4</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="label">Temperature:</span>
+                                    <span class="value">0.7</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="label">Tools Available:</span>
+                                    <span class="value">API Calling, Web Search</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="label">Response Time:</span>
+                                    <span class="value">2.1s avg</span>
+                                </div>
+                                <button class="configure-btn" onclick="showAlert('Configuration modal would open here')">Configure</button>
+                            </div>
+                        </div>
 
-        <!-- Footer -->
-        <footer class="footer">
-            <div class="footer-content">
-                <p>&copy; 2026 AgentForge. Built with ❤️ for the AI community.</p>
-                <div class="footer-links">
-                    <a href="https://github.com/Puneetdivedi/AgentForge" target="_blank">GitHub</a>
-                    <a href="#" target="_blank">Docs</a>
-                    <a href="#" target="_blank">Discord</a>
+                        <div class="agent-config-card">
+                            <div class="agent-header-config">
+                                <div class="agent-icon-large">📚</div>
+                                <div class="agent-info">
+                                    <h3>Retrieval Agent</h3>
+                                    <p>Document Q&A using RAG (Retrieval-Augmented Generation) for knowledge base</p>
+                                </div>
+                                <div class="agent-status active">🟢 Active</div>
+                            </div>
+                            <div class="agent-details">
+                                <div class="detail-row">
+                                    <span class="label">Database:</span>
+                                    <span class="value">ChromaDB</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="label">Embeddings:</span>
+                                    <span class="value">OpenAI</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="label">Indexed Documents:</span>
+                                    <span class="value">1,247</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="label">Accuracy:</span>
+                                    <span class="value">91.2%</span>
+                                </div>
+                                <button class="configure-btn" onclick="showAlert('Configuration modal would open here')">Configure</button>
+                            </div>
+                        </div>
+
+                        <div class="agent-config-card">
+                            <div class="agent-header-config">
+                                <div class="agent-icon-large">📊</div>
+                                <div class="agent-info">
+                                    <h3>Data Analytics Agent</h3>
+                                    <p>Database query execution for business intelligence and analytics</p>
+                                </div>
+                                <div class="agent-status active">🟢 Active</div>
+                            </div>
+                            <div class="agent-details">
+                                <div class="detail-row">
+                                    <span class="label">Database:</span>
+                                    <span class="value">PostgreSQL</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="label">Query Safety:</span>
+                                    <span class="value">Validated</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="label">Queries Executed:</span>
+                                    <span class="value">12,847</span>
+                                </div>
+                                <div class="detail-row">
+                                    <span class="label">Error Rate:</span>
+                                    <span class="value">0.3%</span>
+                                </div>
+                                <button class="configure-btn" onclick="showAlert('Configuration modal would open here')">Configure</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </footer>
+            </section>
+        </main>
     </div>
 
     <script src="script.js"></script>

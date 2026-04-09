@@ -1,8 +1,10 @@
 """Main FastAPI application"""
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 import logging
 import asyncio
+import os
 from contextlib import asynccontextmanager
 
 from app.core.config import get_settings
@@ -79,6 +81,12 @@ app.add_middleware(
 
 # Include routers
 app.include_router(router)
+
+# Mount static files (public folder)
+public_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "public")
+if os.path.exists(public_dir):
+    app.mount("/", StaticFiles(directory=public_dir, html=True), name="static")
+
 
 
 @app.exception_handler(Exception)
