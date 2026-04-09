@@ -1,0 +1,10 @@
+name: Example Workflow
+id: example_workflow
+description: Example workflow orchestrating multiple agents
+steps:
+  - agent: general
+    input: user_input
+    output: general_response
+  - agent: rag
+    input: general_response
+    output: rag_response

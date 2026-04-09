@@ -1,0 +1,9 @@
+name: SQL Agent
+agent_id: sql
+description: SQL query execution and database agent
+model: gpt-4
+persona: default
+tools:
+  - execute_sql
+memory_enabled: true
+temperature: 0.3

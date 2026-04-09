@@ -1,0 +1,9 @@
+name: RAG Agent
+agent_id: rag
+description: Retrieval Augmented Generation agent for document-based Q&A
+model: gpt-4
+persona: default
+tools:
+  - retrieve
+memory_enabled: true
+temperature: 0.5

@@ -1,0 +1,10 @@
+name: General Agent
+agent_id: general
+description: General purpose conversational agent
+model: gpt-4
+persona: default
+tools:
+  - retrieve
+  - call_api
+memory_enabled: true
+temperature: 0.7

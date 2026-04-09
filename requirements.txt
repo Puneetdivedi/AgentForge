@@ -1,2 +1,48 @@
-agentforge
-chromadb
+# Web Framework
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.5.0
+pydantic-settings==2.1.0
+
+# LLM Integration
+openai==1.3.0
+anthropic==0.7.0
+google-generativeai==0.3.0
+
+# Vector Database & Embeddings
+chromadb==0.4.10
+sentence-transformers==2.2.2
+numpy==1.24.3
+
+# Data Processing
+pandas==2.1.0
+PyYAML==6.0.1
+
+# Async & Performance
+redis==5.0.1
+httpx==0.25.0
+asyncio==3.4.3
+
+# Testing
+pytest==7.4.0
+pytest-asyncio==0.21.1
+pytest-cov==4.1.0
+
+# Logging & Observability
+python-json-logger==2.0.7
+opentelemetry-api==1.20.0
+opentelemetry-sdk==1.20.0
+
+# Security
+python-dotenv==1.0.0
+cryptography==41.0.0
+
+# Code Quality
+black==23.10.0
+flake8==6.1.0
+mypy==1.6.0
+isort==5.12.0
+
+# Development
+ipython==8.16.0
+ipdb==0.13.13
