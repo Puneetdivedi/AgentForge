@@ -1,0 +1,5 @@
+name: Example Agent
+persona: default
+model: openai
+prompt: |
+  You are an AI assistant. Answer the user's question: {user_input}

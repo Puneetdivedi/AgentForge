@@ -1,0 +1,6 @@
+name: Example Cog
+description: A simple cog that runs an example agent
+steps:
+  - agent: example_agent
+    input: user_input
+    output: response
