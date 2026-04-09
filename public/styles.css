@@ -460,6 +460,37 @@ body {
     transform: scale(1.05);
 }
 
+.quick-tips {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 12px;
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.tip-btn {
+    background: rgba(0, 217, 255, 0.1);
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    padding: 4px 8px;
+    font-size: 11px;
+    color: var(--primary);
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tip-btn:hover {
+    background: rgba(0, 217, 255, 0.2);
+    border-color: var(--primary);
+}
+
+.tip-text {
+    flex: 1;
+    font-style: italic;
+}
+
+
 .loading-indicator {
     display: flex;
     align-items: center;

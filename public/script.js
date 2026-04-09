@@ -2,12 +2,14 @@
 const API_URL = 'http://localhost:8000/api/v1';
 let sessionId = generateUUID();
 let currentAgent = 'general';
+let examples = {};
 
 // ========== INITIALIZATION ==========
 document.addEventListener('DOMContentLoaded', function() {
     setupTimeDisplay();
     setupCounterAnimation();
     setupIntersectionObserver();
+    loadExamples();
 });
 
 // ========== UTILITY FUNCTIONS ==========
@@ -26,6 +28,51 @@ function escapeHtml(text) {
 
 function showAlert(message) {
     alert(message);
+}
+
+// ========== LOAD EXAMPLES ==========
+async function loadExamples() {
+    try {
+        const response = await fetch(`${API_URL}/examples/general`);
+        if (response.ok) {
+            const data = await response.json();
+            examples.general = data.examples || [];
+        }
+    } catch (e) {
+        console.log("Examples not available in demo mode");
+    }
+}
+
+function insertQuickExample() {
+    currentAgent = currentAgent || 'general';
+    const agentExamples = examples[currentAgent] || getDefaultExamples(currentAgent);
+    
+    if (agentExamples.length > 0) {
+        const randomExample = agentExamples[Math.floor(Math.random() * agentExamples.length)];
+        document.getElementById('messageInput').value = randomExample;
+        document.getElementById('messageInput').focus();
+    }
+}
+
+function getDefaultExamples(agentType) {
+    const defaults = {
+        "general": [
+            "What are the key features of our product?",
+            "How do I troubleshoot connection issues?",
+            "What's our return policy?"
+        ],
+        "rag": [
+            "Search for password reset procedures",
+            "Find information about API integration",
+            "Look up pricing information"
+        ],
+        "sql": [
+            "What are our total sales this quarter?",
+            "Show customer satisfaction by region",
+            "List top 10 products by revenue"
+        ]
+    };
+    return defaults[agentType] || [];
 }
 
 // ========== TIME DISPLAY ==========
@@ -59,7 +106,10 @@ function switchView(viewName) {
         btn.classList.remove('active');
     });
     
-    event.target.closest('.nav-btn').classList.add('active');
+    const activeBtn = document.querySelector(`.nav-btn[onclick*="'${viewName}'"]`);
+    if (activeBtn) {
+        activeBtn.classList.add('active');
+    }
     
     // Trigger animations if needed
     if (viewName === 'dashboard' || viewName === 'analytics') {
@@ -97,6 +147,9 @@ function selectAgent(agentType, buttonElement) {
             </div>
         </div>
     `;
+    
+    // Load examples for this agent
+    loadExamples();
 }
 
 // ========== CHAT FUNCTIONALITY ==========
@@ -179,7 +232,7 @@ function addMessage(text, sender, isError = false) {
     messageDiv.innerHTML = `
         <div class="message-avatar">${avatar}</div>
         <div class="message-bubble ${isError ? 'error' : ''}">
-            <p>${escapeHtml(text)}</p>
+            <p>${escapeHtml(text).replace(/\n/g, '<br>')}</p>
             <span class="timestamp">${timeStr}</span>
         </div>
     `;
@@ -250,3 +303,31 @@ function setupIntersectionObserver() {
         observer.observe(el);
     });
 }
+
+// ========== KEYBOARD SHORTCUTS ==========
+document.addEventListener('keydown', function(event) {
+    // Ctrl/Cmd + E for quick example
+    if ((event.ctrlKey || event.metaKey) && event.key === 'e') {
+        event.preventDefault();
+        insertQuickExample();
+    }
+    // Ctrl/Cmd + 1 for general agent
+    if ((event.ctrlKey || event.metaKey) && event.key === '1') {
+        event.preventDefault();
+        const btn = document.querySelector('.agent-btn');
+        if (btn) selectAgent('general', btn);
+    }
+    // Ctrl/Cmd + 2 for rag agent
+    if ((event.ctrlKey || event.metaKey) && event.key === '2') {
+        event.preventDefault();
+        const btns = document.querySelectorAll('.agent-btn');
+        if (btns[1]) selectAgent('rag', btns[1]);
+    }
+    // Ctrl/Cmd + 3 for sql agent
+    if ((event.ctrlKey || event.metaKey) && event.key === '3') {
+        event.preventDefault();
+        const btns = document.querySelectorAll('.agent-btn');
+        if (btns[2]) selectAgent('sql', btns[2]);
+    }
+});
+
