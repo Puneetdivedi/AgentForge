@@ -82,10 +82,21 @@ app.add_middleware(
 # Include routers
 app.include_router(router)
 
+# Serve dashboard from root
+@app.get("/", include_in_schema=False)
+async def serve_dashboard():
+    """Serve the dashboard"""
+    from fastapi.responses import FileResponse
+    public_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "public")
+    dashboard_path = os.path.join(public_dir, "dashboard.html")
+    if os.path.exists(dashboard_path):
+        return FileResponse(dashboard_path)
+    return {"message": "AgentForge Dashboard"}
+
 # Mount static files (public folder)
 public_dir = os.path.join(os.path.dirname(os.path.dirname(__file__)), "public")
 if os.path.exists(public_dir):
-    app.mount("/", StaticFiles(directory=public_dir, html=True), name="static")
+    app.mount("/static", StaticFiles(directory=public_dir), name="static")
 
 
 

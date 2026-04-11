@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AgentForge Dashboard</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    <link href="/static/dashboard.css" rel="stylesheet">
+</head>
+<body>
+    <!-- Navigation Bar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-gradient">
+        <div class="container-fluid">
+            <a class="navbar-brand fw-bold" href="#"><i class="fas fa-robot"></i> AgentForge</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#dashboard" id="dashboardTab"><i class="fas fa-th-large"></i> Dashboard</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#chat" id="chatTab"><i class="fas fa-comments"></i> Chat</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#agents" id="agentsTab"><i class="fas fa-cogs"></i> Agents</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#metrics" id="metricsTab"><i class="fas fa-chart-line"></i> Metrics</a>
+                    </li>
+                </ul>
+            </div>
+            <div class="status-indicator ms-3">
+                <span id="statusBadge" class="badge bg-success">Online</span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid main-container">
+        <!-- Dashboard Section -->
+        <section id="dashboard-section" class="section active">
+            <!-- Header -->
+            <div class="section-header animate__animated animate__fadeIn">
+                <h1><i class="fas fa-dashboard"></i> Dashboard</h1>
+                <p class="text-muted">Real-time system overview and analytics</p>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-3">
+                    <div class="stat-card animate__animated animate__slideInDown">
+                        <div class="stat-icon health-icon">
+                            <i class="fas fa-heartbeat"></i>
+                        </div>
+                        <div class="stat-content">
+                            <p class="stat-label">System Health</p>
+                            <h3 id="healthScore" class="stat-value">--</h3>
+                            <small id="healthStatus" class="text-muted">Checking...</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card animate__animated animate__slideInDown" style="animation-delay: 0.1s">
+                        <div class="stat-icon requests-icon">
+                            <i class="fas fa-exchange-alt"></i>
+                        </div>
+                        <div class="stat-content">
+                            <p class="stat-label">Total Requests</p>
+                            <h3 id="totalRequests" class="stat-value">0</h3>
+                            <small id="requestRate" class="text-muted">Per minute</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card animate__animated animate__slideInDown" style="animation-delay: 0.2s">
+                        <div class="stat-icon agents-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-content">
+                            <p class="stat-label">Active Agents</p>
+                            <h3 id="activeAgents" class="stat-value">0</h3>
+                            <small id="agentStatus" class="text-muted">Ready</small>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card animate__animated animate__slideInDown" style="animation-delay: 0.3s">
+                        <div class="stat-icon latency-icon">
+                            <i class="fas fa-tachometer-alt"></i>
+                        </div>
+                        <div class="stat-content">
+                            <p class="stat-label">Avg Latency</p>
+                            <h3 id="avgLatency" class="stat-value">--</h3>
+                            <small id="latencyUnit" class="text-muted">ms</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="row g-4 mb-4">
+                <div class="col-lg-6">
+                    <div class="chart-card animate__animated animate__fadeInUp">
+                        <div class="chart-header">
+                            <h5>Request Trend (Last 24h)</h5>
+                            <div class="chart-legend">
+                                <span><i class="fas fa-circle" style="color: #4F46E5;"></i> Requests</span>
+                            </div>
+                        </div>
+                        <canvas id="requestChart"></canvas>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="chart-card animate__animated animate__fadeInUp">
+                        <div class="chart-header">
+                            <h5>Response Times</h5>
+                            <div class="chart-legend">
+                                <span><i class="fas fa-circle" style="color: #10B981;"></i> Avg</span>
+                                <span><i class="fas fa-circle" style="color: #F59E0B;"></i> P95</span>
+                            </div>
+                        </div>
+                        <canvas id="responseTimeChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Metrics -->
+            <div class="row g-4">
+                <div class="col-lg-4">
+                    <div class="metric-card animate__animated animate__fadeInUp">
+                        <h6>Success Rate</h6>
+                        <div class="progress-ring">
+                            <svg viewBox="0 0 36 36">
+                                <circle cx="18" cy="18" r="15.915" fill="none" stroke="#E5E7EB" stroke-width="3"></circle>
+                                <circle id="successCircle" cx="18" cy="18" r="15.915" fill="none" stroke="#10B981" stroke-width="3" stroke-dasharray="0 100"></circle>
+                            </svg>
+                            <div class="progress-text">
+                                <span id="successRate">0</span>%
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="metric-card animate__animated animate__fadeInUp">
+                        <h6>Error Rate</h6>
+                        <div class="progress-ring">
+                            <svg viewBox="0 0 36 36">
+                                <circle cx="18" cy="18" r="15.915" fill="none" stroke="#E5E7EB" stroke-width="3"></circle>
+                                <circle id="errorCircle" cx="18" cy="18" r="15.915" fill="none" stroke="#EF4444" stroke-width="3" stroke-dasharray="0 100"></circle>
+                            </svg>
+                            <div class="progress-text">
+                                <span id="errorRate">0</span>%
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="metric-card animate__animated animate__fadeInUp">
+                        <h6>Uptime</h6>
+                        <div class="progress-ring">
+                            <svg viewBox="0 0 36 36">
+                                <circle cx="18" cy="18" r="15.915" fill="none" stroke="#E5E7EB" stroke-width="3"></circle>
+                                <circle id="uptimeCircle" cx="18" cy="18" r="15.915" fill="none" stroke="#3B82F6" stroke-width="3" stroke-dasharray="0 100"></circle>
+                            </svg>
+                            <div class="progress-text">
+                                <span id="uptime">0</span>%
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Chat Section -->
+        <section id="chat-section" class="section">
+            <div class="section-header animate__animated animate__fadeIn">
+                <h1><i class="fas fa-comments"></i> Chat Assistant</h1>
+                <p class="text-muted">Interact with AgentForge Agents</p>
+            </div>
+
+            <div class="chat-container">
+                <div class="chat-box animate__animated animate__slideInLeft">
+                    <div class="chat-header">
+                        <h5>Agent Conversation</h5>
+                        <div class="agent-selector">
+                            <select id="agentSelect" class="form-select form-select-sm">
+                                <option selected>Select Agent...</option>
+                                <option value="general">General Agent</option>
+                                <option value="rag">RAG Agent</option>
+                                <option value="sql">SQL Agent</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="system-message animate__animated animate__fadeIn">
+                            <i class="fas fa-info-circle"></i> Select an agent and start chatting
+                        </div>
+                    </div>
+                    <div class="chat-input-area">
+                        <div class="input-group">
+                            <input type="text" class="form-control chat-input" id="chatInput" placeholder="Type your message..." autocomplete="off">
+                            <button class="btn btn-primary send-btn" id="sendBtn" type="button">
+                                <i class="fas fa-paper-plane"></i>
+                            </button>
+                        </div>
+                        <small id="charCount" class="text-muted">0/500 characters</small>
+                    </div>
+                </div>
+
+                <div class="chat-sidebar animate__animated animate__slideInRight">
+                    <div class="sidebar-section">
+                        <h6>Recent Conversations</h6>
+                        <div id="conversationsList" class="conversations-list">
+                            <p class="text-muted text-center py-3">No conversations yet</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Agents Section -->
+        <section id="agents-section" class="section">
+            <div class="section-header animate__animated animate__fadeIn">
+                <div>
+                    <h1><i class="fas fa-cogs"></i> Agents Management</h1>
+                    <p class="text-muted">Configure and monitor your AI agents</p>
+                </div>
+                <button class="btn btn-primary btn-lg" id="createAgentBtn">
+                    <i class="fas fa-plus"></i> Create Agent
+                </button>
+            </div>
+
+            <div class="agents-grid" id="agentsGrid">
+                <div class="agent-card animate__animated animate__fadeIn">
+                    <div class="agent-header">
+                        <h5>General Agent</h5>
+                        <span class="badge bg-success">Active</span>
+                    </div>
+                    <div class="agent-body">
+                        <p class="agent-desc">General purpose conversational agent</p>
+                        <div class="agent-stats">
+                            <div class="stat">
+                                <span class="label">Requests:</span>
+                                <span class="value">1,234</span>
+                            </div>
+                            <div class="stat">
+                                <span class="label">Avg Time:</span>
+                                <span class="value">245ms</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="agent-footer">
+                        <button class="btn btn-sm btn-outline-primary">View</button>
+                        <button class="btn btn-sm btn-outline-secondary">Edit</button>
+                    </div>
+                </div>
+
+                <div class="agent-card animate__animated animate__fadeIn" style="animation-delay: 0.1s;">
+                    <div class="agent-header">
+                        <h5>RAG Agent</h5>
+                        <span class="badge bg-success">Active</span>
+                    </div>
+                    <div class="agent-body">
+                        <p class="agent-desc">Retrieval-Augmented Generation agent</p>
+                        <div class="agent-stats">
+                            <div class="stat">
+                                <span class="label">Requests:</span>
+                                <span class="value">856</span>
+                            </div>
+                            <div class="stat">
+                                <span class="label">Avg Time:</span>
+                                <span class="value">512ms</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="agent-footer">
+                        <button class="btn btn-sm btn-outline-primary">View</button>
+                        <button class="btn btn-sm btn-outline-secondary">Edit</button>
+                    </div>
+                </div>
+
+                <div class="agent-card animate__animated animate__fadeIn" style="animation-delay: 0.2s;">
+                    <div class="agent-header">
+                        <h5>SQL Agent</h5>
+                        <span class="badge bg-warning text-dark">Idle</span>
+                    </div>
+                    <div class="agent-body">
+                        <p class="agent-desc">SQL query execution agent</p>
+                        <div class="agent-stats">
+                            <div class="stat">
+                                <span class="label">Requests:</span>
+                                <span class="value">342</span>
+                            </div>
+                            <div class="stat">
+                                <span class="label">Avg Time:</span>
+                                <span class="value">1.2s</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="agent-footer">
+                        <button class="btn btn-sm btn-outline-primary">View</button>
+                        <button class="btn btn-sm btn-outline-secondary">Edit</button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Metrics Section -->
+        <section id="metrics-section" class="section">
+            <div class="section-header animate__animated animate__fadeIn">
+                <h1><i class="fas fa-chart-line"></i> Advanced Metrics</h1>
+                <p class="text-muted">Detailed performance analytics and monitoring</p>
+            </div>
+
+            <div class="row g-4 mb-4">
+                <div class="col-lg-8">
+                    <div class="chart-card animate__animated animate__fadeInUp">
+                        <div class="chart-header">
+                            <h5>Throughput Analysis</h5>
+                            <div class="time-range-selector">
+                                <button class="time-btn active" data-range="24h">24h</button>
+                                <button class="time-btn" data-range="7d">7d</button>
+                                <button class="time-btn" data-range="30d">30d</button>
+                            </div>
+                        </div>
+                        <canvas id="throughputChart"></canvas>
+                    </div>
+                </div>
+                <div class="col-lg-4">
+                    <div class="chart-card animate__animated animate__fadeInUp">
+                        <div class="chart-header">
+                            <h5>Agent Usage Distribution</h5>
+                        </div>
+                        <canvas id="agentPieChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <div class="chart-card animate__animated animate__fadeInUp">
+                        <div class="chart-header">
+                            <h5>API Endpoints Performance</h5>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Endpoint</th>
+                                        <th>Calls</th>
+                                        <th>Avg Time</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="endpointsTable">
+                                    <tr>
+                                        <td>/api/v1/chat</td>
+                                        <td>2,450</td>
+                                        <td>234ms</td>
+                                        <td><span class="badge bg-success">Healthy</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>/health</td>
+                                        <td>5,600</td>
+                                        <td>5ms</td>
+                                        <td><span class="badge bg-success">Healthy</span></td>
+                                    </tr>
+                                    <tr>
+                                        <td>/api/v1/admin/metrics</td>
+                                        <td>890</td>
+                                        <td>45ms</td>
+                                        <td><span class="badge bg-success">Healthy</span></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="chart-card animate__animated animate__fadeInUp">
+                        <div class="chart-header">
+                            <h5>Error Distribution</h5>
+                        </div>
+                        <canvas id="errorChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast-notification">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastMessage">Operation completed</span>
+    </div>
+
+    <!-- Modal for Create Agent -->
+    <div class="modal fade" id="createAgentModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create New Agent</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createAgentForm">
+                        <div class="mb-3">
+                            <label class="form-label">Agent Name</label>
+                            <input type="text" class="form-control" placeholder="Enter agent name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Agent Type</label>
+                            <select class="form-select" required>
+                                <option selected>Choose type...</option>
+                                <option value="general">General Agent</option>
+                                <option value="rag">RAG Agent</option>
+                                <option value="sql">SQL Agent</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Description</label>
+                            <textarea class="form-control" rows="3" placeholder="Enter description"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary">Create Agent</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="/static/dashboard.js"></script>
+</body>
+</html>
