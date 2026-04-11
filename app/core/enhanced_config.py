@@ -344,13 +344,15 @@ class EnhancedSettings(BaseSettings):
         return v
     
     @model_validator(mode="after")
-    def validate_redis_config(self) -> "EnhancedSettings":\n        \"\"\"Validate Redis configuration\"\"\"\n        if self.redis_enabled and not self.redis_url:
-            self.redis_url = f"redis://:{self.redis_password}@{self.redis_host}:{self.redis_port}/{self.redis_db}\" if self.redis_password else f"redis://{self.redis_host}:{self.redis_port}/{self.redis_db}"
+    def validate_redis_config(self) -> "EnhancedSettings":
+        """Validate Redis configuration"""
+        if self.redis_enabled and not self.redis_url:
+            self.redis_url = f"redis://:{self.redis_password}@{self.redis_host}:{self.redis_port}/{self.redis_db}" if self.redis_password else f"redis://{self.redis_host}:{self.redis_port}/{self.redis_db}"
         return self
     
     @model_validator(mode="after")
     def validate_production_config(self) -> "EnhancedSettings":
-        \"\"\"Validate production configuration\"\"\"
+        """Validate production configuration"""
         if self.app_env == Environment.PRODUCTION:
             if self.app_debug:
                 raise ValueError("Debug mode cannot be enabled in production")
@@ -361,24 +363,24 @@ class EnhancedSettings(BaseSettings):
         return self
     
     def is_production(self) -> bool:
-        \"\"\"Check if production environment\"\"\"
+        """Check if production environment"""
         return self.app_env == Environment.PRODUCTION
     
     def is_development(self) -> bool:
-        \"\"\"Check if development environment\"\"\"
+        """Check if development environment"""
         return self.app_env == Environment.DEVELOPMENT
     
     def is_testing(self) -> bool:
-        \"\"\"Check if testing environment\"\"\"
+        """Check if testing environment"""
         return self.app_env == Environment.TESTING
 
 
 def get_settings() -> EnhancedSettings:
-    \"\"\"Get application settings (singleton)\"\"\"
+    """Get application settings (singleton)"""
     return EnhancedSettings()
 
 
 def get_settings_dict() -> Dict[str, Any]:
-    \"\"\"Get settings as dictionary\"\"\"
+    """Get settings as dictionary"""
     settings = get_settings()
     return settings.model_dump()
