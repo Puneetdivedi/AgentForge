@@ -1,5 +1,5 @@
 """FastAPI routes and endpoints"""
-from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks, Request
 from typing import Optional, Dict, Any
 import logging
 import uuid
@@ -10,6 +10,10 @@ from app.schemas.response import (
 )
 from app.core import get_settings, get_logger
 from app.core.security import SecurityValidator, OutputFilter
+from app.core.exceptions import (
+    ValidationError, AgentNotFoundError, AppException,
+    ErrorCode
+)
 
 logger = get_logger(__name__)
 
@@ -117,9 +121,18 @@ async def chat(request: ChatRequest) -> ChatResponse:
     """
     try:
         # Validate input
+        if not request.message or len(request.message.strip()) == 0:
+            raise ValidationError(
+                "Message cannot be empty",
+                details={"field": "message"}
+            )
+        
         if SecurityValidator.validate_prompt_injection(request.message):
             logger.warning(f"Potential prompt injection detected from user {request.user_id}")
-            raise HTTPException(status_code=400, detail="Invalid input detected")
+            raise ValidationError(
+                "Invalid input detected - potential security threat",
+                details={"type": "prompt_injection"}
+            )
         
         # Sanitize input
         message = SecurityValidator.sanitize_input(request.message)
@@ -161,9 +174,18 @@ async def chat(request: ChatRequest) -> ChatResponse:
             timestamp=datetime.utcnow()
         )
     
+    except AppException:
+        # Let app exceptions propagate to be handled by middleware
+        raise
     except Exception as e:
         logger.error(f"Chat endpoint error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise AppException(
+            message="Error processing chat request",
+            error_code=ErrorCode.INTERNAL_SERVER_ERROR,
+            status_code=500,
+            details={"error": str(e)},
+            cause=e
+        )
 
 
 @router.post("/run-agent", response_model=AgentResponse)
@@ -180,11 +202,15 @@ async def run_agent(agent_id: str, input_data: Dict[str, Any] = {}) -> AgentResp
     """
     try:
         if not agent_registry:
-            raise HTTPException(status_code=503, detail="Agent registry not initialized")
+            raise AppException(
+                message="Agent registry not initialized",
+                error_code=ErrorCode.SERVICE_UNAVAILABLE,
+                status_code=503
+            )
         
         agent = agent_registry.get_agent(agent_id)
         if not agent:
-            raise HTTPException(status_code=404, detail=f"Agent not found: {agent_id}")
+            raise AgentNotFoundError(f"Agent not found: {agent_id}")
         
         # Execute agent
         from app.agents.base import AgentContext
@@ -205,9 +231,17 @@ async def run_agent(agent_id: str, input_data: Dict[str, Any] = {}) -> AgentResp
             execution_time=0.0
         )
     
+    except AppException:
+        raise
     except Exception as e:
         logger.error(f"Run agent error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise AppException(
+            message="Error executing agent",
+            error_code=ErrorCode.AGENT_EXECUTION_FAILED,
+            status_code=500,
+            details={"agent_id": agent_id, "error": str(e)},
+            cause=e
+        )
 
 
 @router.get("/agents")
@@ -224,11 +258,15 @@ async def list_agents() -> Dict[str, Any]:
 async def get_agent_info(agent_id: str) -> Dict[str, Any]:
     """Get agent information"""
     if not agent_registry:
-        raise HTTPException(status_code=503, detail="Agent registry not initialized")
+        raise AppException(
+            message="Agent registry not initialized",
+            error_code=ErrorCode.SERVICE_UNAVAILABLE,
+            status_code=503
+        )
     
     agent = agent_registry.get_agent(agent_id)
     if not agent:
-        raise HTTPException(status_code=404, detail=f"Agent not found: {agent_id}")
+        raise AgentNotFoundError(f"Agent not found: {agent_id}")
     
     return {
         "agent_id": agent_id,

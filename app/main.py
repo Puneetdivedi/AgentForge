@@ -1,7 +1,8 @@
 """Main FastAPI application"""
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import JSONResponse
 import logging
 import asyncio
 import os
@@ -10,6 +11,8 @@ from contextlib import asynccontextmanager
 from app.core.config import get_settings
 from app.core.logging import setup_logging, get_logger
 from app.core.dependencies import init_dependencies, close_redis
+from app.core.middleware import register_middleware
+from app.core.exceptions import AppException, ErrorCode
 from app.api.routes import router
 from app.agents import AgentRegistry
 from app.services.orchestrator_service import Orchestrator, OrchestratorConfig
@@ -67,20 +70,81 @@ app = FastAPI(
     title=settings.api_title,
     version=settings.api_version,
     debug=settings.debug,
-    lifespan=lifespan
+    lifespan=lifespan,
+    docs_url="/api/docs",
+    redoc_url="/api/redoc",
+    openapi_url="/api/openapi.json"
 )
 
-# Add CORS middleware
+# Register industry-level middleware (security, logging, monitoring, rate limiting, error handling)
+register_middleware(app)
+
+# Add CORS middleware (positioned after register_middleware)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=settings.cors_origins if hasattr(settings, 'cors_origins') else ["*"],
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"],
     allow_headers=["*"],
+    allow_origin_regex=r"https://.*\.example\.com" if hasattr(settings, 'cors_origin_regex') else None
 )
 
 # Include routers
 app.include_router(router)
+
+# Health Check Endpoints (Kubernetes probes)
+@app.get("/health", tags=["health"], include_in_schema=True)
+async def health_check():
+    """Liveness probe - basic health check"""
+    return {"status": "ok", "service": "agentforge"}
+
+
+@app.get("/health/ready", tags=["health"], include_in_schema=True)
+async def readiness_check():
+    """Readiness probe - checks if service is ready to handle traffic"""
+    try:
+        # Check dependencies
+        await init_dependencies()
+        return {
+            "status": "ready",
+            "service": "agentforge",
+            "timestamp": __import__('datetime').datetime.utcnow().isoformat()
+        }
+    except Exception as e:
+        logger.error(f"Readiness check failed: {e}")
+        return JSONResponse(
+            status_code=503,
+            content={"status": "not_ready", "error": str(e)}
+        )
+
+
+@app.get("/health/live", tags=["health"], include_in_schema=True)
+async def liveness_check():
+    """Startup probe - checks if service is alive"""
+    try:
+        # Basic connectivity check
+        return {
+            "status": "alive",
+            "service": "agentforge",
+            "version": settings.api_version,
+            "environment": str(settings.app_env)
+        }
+    except Exception as e:
+        logger.error(f"Liveness check failed: {e}")
+        return JSONResponse(
+            status_code=503,
+            content={"status": "dead", "error": str(e)}
+        )
+
+
+@app.get("/api/version", tags=["info"], include_in_schema=True)
+async def version():
+    """Get API version"""
+    return {
+        "version": settings.api_version,
+        "service": settings.api_title,
+        "environment": str(settings.app_env)
+    }
 
 # Serve dashboard from root
 @app.get("/", include_in_schema=False)
@@ -100,14 +164,50 @@ if os.path.exists(public_dir):
 
 
 
+@app.exception_handler(AppException)
+async def app_exception_handler(request: Request, exc: AppException):
+    """Handle application exceptions with standardized response"""
+    request_id = getattr(request.state, "request_id", f"req_{os.urandom(6).hex()}")
+    logger.warning(
+        f"Application error: {exc.error_code.value}",
+        extra={
+            "request_id": request_id,
+            "error_code": exc.error_code.value,
+            "status_code": exc.status_code,
+            "message": exc.message
+        }
+    )
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={
+            "error_code": exc.error_code.value,
+            "message": exc.message,
+            "request_id": request_id,
+            "details": exc.details
+        }
+    )
+
+
 @app.exception_handler(Exception)
-async def global_exception_handler(request, exc):
-    """Global exception handler"""
-    logger.error(f"Unhandled exception: {exc}")
-    from fastapi.responses import JSONResponse
+async def global_exception_handler(request: Request, exc: Exception):
+    """Global exception handler for unexpected errors"""
+    request_id = getattr(request.state, "request_id", f"req_{os.urandom(6).hex()}")
+    logger.error(
+        f"Unexpected error: {str(exc)}",
+        extra={
+            "request_id": request_id,
+            "path": request.url.path,
+            "method": request.method
+        },
+        exc_info=True
+    )
     return JSONResponse(
         status_code=500,
-        content={"detail": "Internal server error"}
+        content={
+            "error_code": ErrorCode.INTERNAL_SERVER_ERROR.value,
+            "message": "Internal server error",
+            "request_id": request_id
+        }
     )
 
 
