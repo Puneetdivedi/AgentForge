@@ -4,11 +4,16 @@
 
 class Dashboard {
     constructor() {
-        this.apiBase = 'http://localhost:8000';
+        // Dynamic API URL detection
+        const protocol = window.location.protocol;
+        const host = window.location.host;
+        this.apiBase = `${protocol}//${host.includes('localhost') ? 'localhost:8001' : host}`;
         this.charts = {};
         this.metrics = {};
         this.currentConversation = null;
         this.currentAgent = null;
+        this.isLoading = false;
+        this.notifications = [];
         this.init();
     }
 
@@ -63,15 +68,22 @@ class Dashboard {
         // Hide all sections
         document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
         
-        // Show selected section
-        document.getElementById(`${tab}-section`).classList.add('active');
+        // Show selected section with fade animation
+        const section = document.getElementById(`${tab}-section`);
+        if (section) {
+            section.classList.add('active');
+            section.style.animation = 'none';
+            setTimeout(() => {
+                section.style.animation = '';
+            }, 10);
+        }
 
         // Update nav
         document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
         document.getElementById(`${tab}Tab`).classList.add('active');
 
-        // Scroll to top
-        window.scrollTo(0, 0);
+        // Scroll to top smoothly
+        window.scrollTo({ top: 0, behavior: 'smooth' });
 
         // Trigger refresh for charts
         if (tab === 'metrics') {
@@ -79,6 +91,9 @@ class Dashboard {
                 Object.values(this.charts).forEach(chart => chart.resize());
             }, 100);
         }
+        
+        // Announce tab change for accessibility
+        this.announce(`Switched to ${tab} view`);
     }
 
     async loadInitialData() {
@@ -145,6 +160,13 @@ class Dashboard {
         const badge = document.getElementById('statusBadge');
         badge.textContent = status;
         badge.className = status === 'Online' ? 'badge bg-success' : 'badge bg-danger';
+        
+        // Show connection status notification
+        if (status === 'Online') {
+            this.showNotification('Connected to API', 'success', 2000);
+        } else {
+            this.showNotification('API connection lost', 'error');
+        }
     }
 
     startMetricsUpdates() {
@@ -460,6 +482,64 @@ class Dashboard {
             );
             this.charts.throughput.update();
         }
+    }
+
+    showNotification(message, type = 'info', duration = 3000) {
+        const id = Date.now();
+        let bgColor = 'bg-info';
+        let icon = 'fa-info-circle';
+        
+        if (type === 'success') {
+            bgColor = 'bg-success';
+            icon = 'fa-check-circle';
+        } else if (type === 'error') {
+            bgColor = 'bg-danger';
+            icon = 'fa-exclamation-circle';
+        } else if (type === 'warning') {
+            bgColor = 'bg-warning';
+            icon = 'fa-warning';
+        }
+        
+        const notification = document.createElement('div');
+        notification.id = `notif-${id}`;
+        notification.className = `alert alert-dismissible fade show ${bgColor} notification-toast`;
+        notification.innerHTML = `
+            <i class="fas ${icon} me-2"></i>
+            <span>${message}</span>
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        `;
+        
+        const container = document.getElementById('notificationContainer') || this.createNotificationContainer();
+        container.appendChild(notification);
+        
+        if (duration > 0) {
+            setTimeout(() => {
+                notification.remove();
+            }, duration);
+        }
+    }
+    
+    createNotificationContainer() {
+        const container = document.createElement('div');
+        container.id = 'notificationContainer';
+        container.className = 'position-fixed top-0 end-0 m-3';
+        container.style.zIndex = '9999';
+        document.body.appendChild(container);
+        return container;
+    }
+    
+    announce(message) {
+        const liveRegion = document.getElementById('ariaLiveRegion') || this.createLiveRegion();
+        liveRegion.textContent = message;
+    }
+    
+    createLiveRegion() {
+        const region = document.createElement('div');
+        region.id = 'ariaLiveRegion';
+        region.setAttribute('aria-live', 'polite');
+        region.className = 'visually-hidden';
+        document.body.appendChild(region);
+        return region;
     }
 
     async sendMessage() {
