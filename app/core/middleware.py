@@ -1,5 +1,6 @@
 """Middleware and request/response handling"""
 from fastapi import Request, Response
+from starlette.middleware.base import BaseHTTPMiddleware
 from fastapi.responses import JSONResponse
 import time
 import logging
@@ -15,14 +16,14 @@ from app.core.exceptions import AppException
 logger = get_logger(__name__)
 
 
-class RequestLoggingMiddleware:
+class RequestLoggingMiddleware(BaseHTTPMiddleware):
     """Middleware for structured request/response logging"""
     
     def __init__(self, app):
-        self.app = app
+        super().__init__(app)
         self.logger = get_logger(__name__)
     
-    async def __call__(self, request: Request, call_next: Callable) -> Response:
+    async def dispatch(self, request: Request, call_next: Callable) -> Response:
         """Process request and log details"""
         # Generate unique request ID
         request_id = request.headers.get(
@@ -93,14 +94,14 @@ class RequestLoggingMiddleware:
         return response
 
 
-class ErrorHandlingMiddleware:
+class ErrorHandlingMiddleware(BaseHTTPMiddleware):
     """Middleware for standardized error handling"""
     
     def __init__(self, app):
-        self.app = app
+        super().__init__(app)
         self.logger = get_logger(__name__)
     
-    async def __call__(self, request: Request, call_next: Callable) -> Response:
+    async def dispatch(self, request: Request, call_next: Callable) -> Response:
         """Handle errors and return standardized responses"""
         try:
             response = await call_next(request)
@@ -161,17 +162,17 @@ class ErrorHandlingMiddleware:
             )
 
 
-class RateLimitMiddleware:
+class RateLimitMiddleware(BaseHTTPMiddleware):
     """Middleware for rate limiting"""
     
     def __init__(self, app, max_requests: int = 100, window_seconds: int = 60):
-        self.app = app
+        super().__init__(app)
         self.max_requests = max_requests
         self.window_seconds = window_seconds
         self.requests = {}  # {ip: [(timestamp, count)]}
         self.logger = get_logger(__name__)
     
-    async def __call__(self, request: Request, call_next: Callable) -> Response:
+    async def dispatch(self, request: Request, call_next: Callable) -> Response:
         """Check rate limit"""
         client_ip = request.client.host if request.client else "unknown"
         current_time = time.time()
@@ -225,15 +226,15 @@ class RateLimitMiddleware:
         return response
 
 
-class CompressionMiddleware:
+class CompressionMiddleware(BaseHTTPMiddleware):
     """Middleware for response compression"""
     
     def __init__(self, app, min_size: int = 1000):
-        self.app = app
+        super().__init__(app)
         self.min_size = min_size
         self.logger = get_logger(__name__)
     
-    async def __call__(self, request: Request, call_next: Callable) -> Response:
+    async def dispatch(self, request: Request, call_next: Callable) -> Response:
         """Compress response if needed"""
         response = await call_next(request)
         
@@ -248,14 +249,14 @@ class CompressionMiddleware:
         return response
 
 
-class SecurityHeadersMiddleware:
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     """Middleware for adding security headers"""
     
     def __init__(self, app):
-        self.app = app
+        super().__init__(app)
         self.logger = get_logger(__name__)
     
-    async def __call__(self, request: Request, call_next: Callable) -> Response:
+    async def dispatch(self, request: Request, call_next: Callable) -> Response:
         """Add security headers to response"""
         response = await call_next(request)
         
@@ -270,14 +271,14 @@ class SecurityHeadersMiddleware:
         return response
 
 
-class CorrelationIdMiddleware:
+class CorrelationIdMiddleware(BaseHTTPMiddleware):
     """Middleware for correlation ID tracking"""
     
     def __init__(self, app):
-        self.app = app
+        super().__init__(app)
         self.logger = get_logger(__name__)
     
-    async def __call__(self, request: Request, call_next: Callable) -> Response:
+    async def dispatch(self, request: Request, call_next: Callable) -> Response:
         """Add correlation ID to requests"""
         correlation_id = request.headers.get(
             "X-Correlation-ID",

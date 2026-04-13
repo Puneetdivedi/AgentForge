@@ -127,7 +127,7 @@ async def liveness_check():
             "status": "alive",
             "service": "agentforge",
             "version": settings.api_version,
-            "environment": str(settings.app_env)
+            "environment": getattr(settings, 'app_env', 'unknown')
         }
     except Exception as e:
         logger.error(f"Liveness check failed: {e}")
@@ -143,7 +143,7 @@ async def version():
     return {
         "version": settings.api_version,
         "service": settings.api_title,
-        "environment": str(settings.app_env)
+        "environment": getattr(settings, 'app_env', 'unknown')
     }
 
 # Serve dashboard from root
